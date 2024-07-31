@@ -1,4 +1,5 @@
-import express from "express";
+import { error } from "console";
+import express, { Request } from "express";
 const app = express();
 
 app.use(express.json());
@@ -36,12 +37,36 @@ const logger = (req, res, next) => {
   next();
 };
 
-app.get("/", logger, (req, res) => {
-  res.send("Hello World!");
+app.get("/", logger, async (req, res, next) => {
+  try {
+    res.send(something);
+  } catch (error) {
+    next(error);
+  }
 });
 app.post("/", logger, (req, res) => {
   console.log(req.body);
   res.send("got data");
+});
+
+// handle not found route
+
+app.all("*", (req, res) => {
+  res.status(400).json({
+    success: false,
+    message: "route not found",
+  });
+});
+
+// global error handler
+
+app.use((error, req, res, next) => {
+  if (error) {
+    res.status(400).json({
+      success: false,
+      message: "something went wrong",
+    });
+  }
 });
 
 export default app;
